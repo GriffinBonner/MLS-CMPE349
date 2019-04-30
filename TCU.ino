@@ -28,6 +28,7 @@ Adafruit_SPIFlash flash(FLASH_SS, &FLASH_SPI_PORT);
 
 Adafruit_W25Q16BV_FatFs fatfs(flash);
 
+/* TODO: Potentiall switch to I2C
 
 /* ----------------- Signal Definitions -------------- */
 const int SLAVE_SELECT = 10;                                               // Active low slave select control signal
