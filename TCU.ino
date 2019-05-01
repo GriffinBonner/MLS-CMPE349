@@ -4,6 +4,9 @@
  * Description: See TCU System Design Document (SDD) 
  */
 
+// TODO: Create separate flash memory init file
+
+
 #include <SPI.h>                                                          // SPI interface library
 #include <stdint.h>
 #include <Adafruit_SPIFlash.h>                                            // SPI flash library
