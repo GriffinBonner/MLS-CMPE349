@@ -1,3 +1,6 @@
+//slave receiver: https://github.com/esp8266/Arduino/blob/master/libraries/Wire/examples/slave_receiver/slave_receiver.ino
+//master sender: https://github.com/esp8266/Arduino/blob/master/libraries/Wire/examples/master_writer/master_writer.ino
+
 #include <Wire.h>                                                         // I2C interface library
 #include <stdint.h>
 
