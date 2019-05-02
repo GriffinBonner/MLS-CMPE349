@@ -1,0 +1,6 @@
+{
+    "board": "adafruit:samd:adafruit_itsybitsy_m0",
+    "programmer": "AVR ISP",
+    "port": "COM5",
+    "sketch": "MLS_TCU.ino"
+}
