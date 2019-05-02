@@ -1,5 +1,6 @@
-#include <SPI.h>
-//#include <math.h>
+#include <SPI.h>                                                          // SPI interface library
+#include <Wire.h>                                                         // I2C interface library
+#include <stdint.h>
 
 const float FREQ = 6.0; //frequency in khz
 const float BW = 10; //3db beamwidth in degrees
