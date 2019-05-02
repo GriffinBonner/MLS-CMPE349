@@ -1,4 +1,3 @@
-#include <SPI.h>                                                          // SPI interface library
 #include <Wire.h>                                                         // I2C interface library
 #include <stdint.h>
 
@@ -37,12 +36,25 @@ void loop() {
   }
   
   //determine function type
+  
     
   //determine phase shift
+  if(byte[1] && 0b00000001 == 1)
+  {
+    phase = 1;
+  }
+  else 
+  {
+    phase = 0;
+  }
     
   //determine timing
     
+    
   //Simulate signal
   volt = phase*peak*sin(2*3.14159*FREQ*t)*sin((TR-TS)/(1.12*BW))/((TR-TS)/(1.12*BW));
+    
+  Serial.println(volt); //plot signal, reference url listed below:
+  Serial.print(" "); //https://learn.adafruit.com/experimenters-guide-for-metro/circ08-using%20the%20arduino%20serial%20plotter
 }
 
