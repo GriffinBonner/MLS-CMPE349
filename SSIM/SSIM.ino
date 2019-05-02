@@ -1,16 +1,14 @@
 /*
 SSIM code for transmitting signnal 
 I2c protocal utilizes with wire library
-Authors: Zak Kempler, Jd Bryon, Taylor bear, Cole shmidt
+Authors: Zak Kempler, Jd Bryon, Taylor Bear, Cole Schmidt
 
 Reference code ----------
 slave receiver: https://github.com/esp8266/Arduino/blob/master/libraries/Wire/examples/slave_receiver/slave_receiver.ino
 master sender: https://github.com/esp8266/Arduino/blob/master/libraries/Wire/examples/master_writer/master_writer.ino
 plot://https://learn.adafruit.com/experimenters-guide-for-metro/circ08-using%20the%20arduino%20serial%20plotter
 */
-
-
-#include <Wire.h>                                                         // I2C interface library
+#include <Wire.h>         // I2C interface library
 #include <stdint.h>
 
 const float FREQ = 6.0; //frequency in khz
