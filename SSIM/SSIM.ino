@@ -13,6 +13,7 @@ bool antennas[3]; //0:AZ 1:BAZ 2:EL
 float peak; //peak set by TCU given function
 int phase; //1 or -1
 float t; //counter for time?
+int timedelay;
 
 uint8_t bytes[3];
 
@@ -42,7 +43,7 @@ void loop() {
   
     
   //determine phase shift
-  if(byte[1] && 0b00000001 == 1)
+  if(byte[1] & 0b00000001 == 1)
   {
     phase = 1;
   }
@@ -52,7 +53,7 @@ void loop() {
   }
     
   //determine timing
-    
+  timedelay = byte[2]*256 + byte[3]&0b11111100; //assuming byte3 has msb starting at bit 8 (note 22 bits used out of 3 bytes)
     
   //Simulate signal
   volt = phase*peak*sin(2*3.14159*FREQ*t)*sin((TR-TS)/(1.12*BW))/((TR-TS)/(1.12*BW));
