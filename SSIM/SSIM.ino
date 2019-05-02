@@ -1,5 +1,14 @@
-//slave receiver: https://github.com/esp8266/Arduino/blob/master/libraries/Wire/examples/slave_receiver/slave_receiver.ino
-//master sender: https://github.com/esp8266/Arduino/blob/master/libraries/Wire/examples/master_writer/master_writer.ino
+/*
+SSIM code for transmitting signnal 
+I2c protocal utilizes with wire library
+Authors: Zak Kempler, Jd Bryon, Taylor bear, Cole shmidt
+
+Reference code ----------
+slave receiver: https://github.com/esp8266/Arduino/blob/master/libraries/Wire/examples/slave_receiver/slave_receiver.ino
+master sender: https://github.com/esp8266/Arduino/blob/master/libraries/Wire/examples/master_writer/master_writer.ino
+plot://https://learn.adafruit.com/experimenters-guide-for-metro/circ08-using%20the%20arduino%20serial%20plotter
+*/
+
 
 #include <Wire.h>                                                         // I2C interface library
 #include <stdint.h>
@@ -39,7 +48,7 @@ void loop() {
     ++i;
   }
   
-  //determine function type
+  //determine function type, then set antenna array
   
     
   //determine phase shift
@@ -52,13 +61,13 @@ void loop() {
     phase = 0;
   }
     
-  //determine timing
+  //determine timing (in microseconds)
   timedelay = byte[2]*256 + byte[3]&0b11111100; //assuming byte3 has msb starting at bit 8 (note 22 bits used out of 3 bytes)
     
   //Simulate signal
   volt = phase*peak*sin(2*3.14159*FREQ*t)*sin((TR-TS)/(1.12*BW))/((TR-TS)/(1.12*BW));
     
-  Serial.println(volt); //plot signal, reference url listed below:
-  Serial.print(" "); //https://learn.adafruit.com/experimenters-guide-for-metro/circ08-using%20the%20arduino%20serial%20plotter
+  Serial.println(volt); //plot signal
+  Serial.print(" "); 
 }
 
