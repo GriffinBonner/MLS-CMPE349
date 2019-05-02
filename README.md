@@ -1,4 +1,4 @@
+## TCU & SSIM Code 
 ## Authors: GROUP9J and GROUP9G
-MLS-TCU-GROUP9J-CMPE349 & MLS-SSIM-GROUP9G-CMPE349
-Description: Code 
+
 
