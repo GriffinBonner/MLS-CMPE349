@@ -56,7 +56,7 @@ void loop() {
   }
   else 
   {
-    phase = 0;
+    phase = -1;
   }
     
   //determine timing (in microseconds)
