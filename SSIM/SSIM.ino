@@ -14,11 +14,11 @@ plot://https://learn.adafruit.com/experimenters-guide-for-metro/circ08-using%20t
 const float FREQ = 6.0; //frequency in khz
 const float BW = 10; //3db beamwidth in degrees
 const float SCANVEL = 2.0; //degree per microsecond
-float TR = 66; //angle of plane's receiver in the coverage volume 
+float TR = 10; //angle of plane's receiver in the coverage volume 
 float TS; //scanning beam angle (should be function of time)
 double volt; //output voltage
 bool antennas[3]; //0:AZ 1:BAZ 2:EL
-float peak; //peak set by TCU given function
+float peak = 10; //peak set by TCU given function
 int phase; //1 or -1
 float t; //counter for time?
 int timedelay;
@@ -56,6 +56,7 @@ void loop() {
     antennas[0] == 1;
     antennas[1] == 0;
     antennas[2] == 0;
+    
   }
   else if(function == 0x92) //BAZ
   {
@@ -71,8 +72,24 @@ void loop() {
     antennas[1] == 0;
     antennas[2] == 1;
   }  
+  
+  //Determine timing t (in microseconds)
+  timedelay = byte[1]*256 + byte[2]&0b11111100; //assuming byte3 has msb starting at bit 8 (note 22 bits used out of 3 bytes
     
-    
+  //Set Scanning Beam Angle  
+  if(antennas[0] == 1)
+  {
+    TS = (Tzero[0] - timedelay)*SCANVEL/2;
+  }
+  else if(antennas[1] == 1)
+  {
+    TS = (Tzero[1] - timedelay)*SCANVEL/2;
+  }
+  
+  else if(antennas[2] == 1)
+  {
+    TS = (Tzero[2] - timedelay)*SCANVEL/2;
+  }
     
   //determine phase shift
   if(byte[0] & 0b00000001 == 1)
@@ -83,10 +100,7 @@ void loop() {
   {
     phase = -1;
   }
-    
-  //determine timing (in microseconds)
-  timedelay = byte[1]*256 + byte[2]&0b11111100; //assuming byte3 has msb starting at bit 8 (note 22 bits used out of 3 bytes)
-    
+      
   //Simulate signal
   volt = phase*peak*sin(2*3.14159*FREQ*t)*sin((TR-TS)/(1.12*BW))/((TR-TS)/(1.12*BW));
     
