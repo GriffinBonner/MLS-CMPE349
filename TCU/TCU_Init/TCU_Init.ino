@@ -86,7 +86,6 @@ void fatfs_init(){
       writeFile.println(0xAE, HEX);    // Auxiliary Data Word B (ADWB) function ID
       writeFile.println(0xF1, HEX);    // Auxiliary Data Word C (ADWC) function ID
     }
-
     writeFile.close();
   }
 
