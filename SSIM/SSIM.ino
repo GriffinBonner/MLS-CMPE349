@@ -2,7 +2,6 @@
 SSIM code for transmitting signnal 
 I2c protocal utilizes with wire library
 Authors: Zak Kempler, Jd Bryon, Taylor Bear, Cole Schmidt
-
 Reference code ----------
 master sender / slave receiver: https://www.arduino.cc/en/Tutorial/MasterWriter
 plot://https://learn.adafruit.com/experimenters-guide-for-metro/circ08-using%20the%20arduino%20serial%20plotter
@@ -39,15 +38,16 @@ void setup() {
   Serial.begin(9600);           // start serial for output
 }
 
-void loop() {
-  void receiveEvent(size_t howMany) {
+void receiveEvent(int howMany) {
   int i = 0; 
-  (void) howMany;
   while (1 < Wire.available()) { // loop through all but the last
     bytes[i]  = Wire.read(); // receive byte as a character
     //Serial.print(bytes[i]);         // print the character
     ++i;
   }
+}
+  
+void loop() {
     
   //reset antennas
   antennas[0] == 0;
@@ -55,7 +55,7 @@ void loop() {
   antennas[2] == 0;
     
   //determine function type, then set antenna array
-  function = byte[0]&0b11111110;
+  function = bytes[0]&0b11111110;
     
   if(function == 0x32) //AZ function
   {
@@ -80,7 +80,7 @@ void loop() {
   }  
   
   //Determine timing t (in microseconds)
-  timedelay = byte[1]*256 + byte[2]&0b11111100; //assuming byte3 has msb starting at bit 8 (note 22 bits used out of 3 bytes
+  timedelay = bytes[1]*256 + bytes[2]&0b11111100; //assuming byte3 has msb starting at bit 8 (note 22 bits used out of 3 bytes
     
   //Set Scanning Beam Angle  
   if(antennas[0] == 1)
@@ -98,7 +98,7 @@ void loop() {
   }
     
   //determine phase shift
-  if(byte[0] & 0b00000001 == 1)
+  if(bytes[0] & 0b00000001 == 1)
   {
     phase = 1;
   }
@@ -120,4 +120,3 @@ void loop() {
   Serial.println(volt); //plot signal
   Serial.print(" "); 
 }
-
