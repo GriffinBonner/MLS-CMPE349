@@ -71,7 +71,7 @@ void fatfs_init(){
   }else{
     Serial.println("Opened file site_personality/tcu_constants.txt for writing...");
 
-    // TCU System Constants stored in virtual fatfs filesystem
+    // TCU Function Identification Codes (7-bits with appended 1-bit DPSK bit)
     if(writeFile.size() <= 0){
       writeFile.println(0x32, HEX);    // Approach Azimuth (AZ) function ID
       writeFile.println(0x92, HEX);    // Back Azimuth (BAZ) function ID
