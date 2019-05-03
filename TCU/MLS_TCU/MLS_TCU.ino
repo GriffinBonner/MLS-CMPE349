@@ -57,7 +57,7 @@ void setup() {
 
 /* ----------------- TCU main function ------------- */
 void loop(){
-
+  
   digitalWrite(TIME_SYNC_OUT, HIGH);                                      // 1ms positive pulse
 
 }
