@@ -23,6 +23,7 @@ float t; //counter for time?
 int timedelay;
 
 uint8_t bytes[3];
+uint8_t function;
 
 #define SDA_PIN 4
 #define SCL_PIN 5
@@ -47,7 +48,29 @@ void loop() {
   }
   
   //determine function type, then set antenna array
-  
+  function = byte[0]&0b11111110;
+  if(function == 0x32) //AZ function
+  {
+    antennas[0] == 1;
+    antennas[1] == 0;
+    antennas[2] == 0;
+  }
+  else if(function == 0x92) //BAZ
+  {
+    
+    antennas[0] == 0;
+    antennas[1] == 1;
+    antennas[2] == 0;
+  }
+  else if (function == 0xC2) //EL
+  {
+    
+    antennas[0] == 0;
+    antennas[1] == 0;
+    antennas[2] == 1;
+  }  
+    
+    
     
   //determine phase shift
   if(byte[0] & 0b00000001 == 1)
