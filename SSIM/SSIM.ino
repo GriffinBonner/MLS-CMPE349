@@ -13,6 +13,7 @@ plot://https://learn.adafruit.com/experimenters-guide-for-metro/circ08-using%20t
 
 const float FREQ = 6.0; //frequency in khz
 const float BW = 10; //3db beamwidth in degrees
+const float SCANVEL = 2.0; //degree per microsecond
 float TR = 66; //angle of plane's receiver in the coverage volume 
 float TS; //scanning beam angle (should be function of time)
 double volt; //output voltage
@@ -25,11 +26,12 @@ int timedelay;
 uint8_t bytes[3];
 uint8_t function;
 
-#define SDA_PIN 4
-#define SCL_PIN 5
-
 const int16_t I2C_MASTER = 0x42;
-const int16_t I2C_SLAVE = 0x08;  
+const int16_t I2C_SLAVE = 0x08;
+#define SDA_PIN 4
+#define SCL_PIN 5  
+
+float Tzero[3] = {6800, 4800, 33500};
 
 void setup() {
   Serial.begin(115200);           // start serial for output (serial used for plot)
