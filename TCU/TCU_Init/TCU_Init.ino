@@ -5,6 +5,7 @@
  */
 
 #include <SPI.h>
+#include <MsTimer2.h>
 #include <Adafruit_SPIFlash.h>
 #include <Adafruit_SPIFlash_FatFs.h>
 
@@ -122,7 +123,7 @@ void fatfs_init(){
 }
 
 
-
+// 
 void setup() {
 
   serial_init();          // initialize serial connection (Baud: 115200)                                         
