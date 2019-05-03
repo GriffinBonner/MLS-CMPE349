@@ -45,7 +45,7 @@ void fatfs_init(){
     Serial.println("Error, failed to initialize Flash Memory");
     while(1);
   }
-  //Serial.print("Flash chip JEDEC ID: 0x"); Serial.println(flash.GetJEDECID(), HEX);
+  Serial.print("Flash chip JEDEC ID: 0x"); Serial.println(flash.GetJEDECID(), HEX);
 
   // Mount fatfs Flash filesystem
   if(!fatfs.begin()){
@@ -71,6 +71,20 @@ void fatfs_init(){
   }else{
     Serial.println("Opened file site_personality/tcu_constants.txt for writing...");
 
+    // TCU System Constants stored in virtual fatfs filesystem
+    if(writeFile.size() <= 0){
+      writeFile.println(0x32, HEX);    // Approach Azimuth (AZ) function ID
+      writeFile.println(0x92, HEX);    // Back Azimuth (BAZ) function ID
+      writeFile.println(0xC2, HEX);    // Approach Elevation (EL) function ID
+      writeFile.println(0x50, HEX);    // Basic Data Word 1 (BDW1) function ID
+      writeFile.println(0x78, HEX);    // Basic Data Word 2 (BDW1) function ID
+      writeFile.println(0xA0, HEX);    // Basic Data Word 3 (BDW1) function ID
+      writeFile.println(0x88, HEX);    // Basic Data Word 4 (BDW1) function ID
+      writeFile.println(0x1A, HEX);    // Basic Data Word 6 (BDW1) function ID
+      writeFile.println(0xE4, HEX);    // Auxiliary Data Word A (ADWA) function ID
+      writeFile.println(0xAE, HEX);    // Auxiliary Data Word B (ADWB) function ID
+      writeFile.println(0xF1, HEX);    // Auxiliary Data Word C (ADWC) function ID
+    }  
 
     writeFile.close();
   }
@@ -85,8 +99,25 @@ void fatfs_init(){
     while(1);
   }else{
     Serial.println("Opened file stite_personality/tcu_constants.txt for reading...");
+
     String line = readFile.readStringUntil('\n');
-    Serial.print("First line of test.txt: "); Serial.println(line);
+    Serial.print("Approach Azimuth Function ID: 0x"); Serial.println(line);
+
+    String line2 = readFile.readStringUntil('\n');
+    Serial.print("Back Azimuth Function ID: 0x"); Serial.println(line2);
+
+    String line3 = readFile.readStringUntil('\n');
+    Serial.print("Approach Elevation Function ID: 0x"); Serial.println(line3);
+
+
+    for(int i = 0; i < 8; i++){
+      String line = readFile.readStringUntil('\n');
+      Serial.println(line);
+    }
+
+    Serial.print("Total size of test.txt (bytes): "); Serial.println(readFile.size(), DEC);
+    Serial.print("Current position in test.txt: "); Serial.println(readFile.position(), DEC);
+    Serial.print("Available data to read in test.txt: "); Serial.println(readFile.available(), DEC);
   }
 }
 
