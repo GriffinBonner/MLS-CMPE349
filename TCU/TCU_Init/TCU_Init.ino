@@ -4,15 +4,14 @@
  * Description: Initialize flash memory file with TCU system constants
  */
 
+#include <Timer.h>
 #include <SPI.h>
-#include <MsTimer2.h>
 #include <Adafruit_SPIFlash.h>
 #include <Adafruit_SPIFlash_FatFs.h>
 
 
 /* ----------------- SPI FLASH definitions ----------------- */
 #define FLASH_TYPE    SPIFLASHTYPE_W25Q16BV                               // Configuration of flash fatfs object
-
 #if defined(__SAMD51__)
   Adafruit_SPIFlash flash(PIN_QSPI_SCK, PIN_QSPI_IO1, PIN_QSPI_IO0, PIN_QSPI_CS);
 #else
@@ -25,7 +24,6 @@
   #endif
 Adafruit_SPIFlash flash(FLASH_SS, &FLASH_SPI_PORT);
 #endif
-
 Adafruit_W25Q16BV_FatFs fatfs(flash);
 
 
