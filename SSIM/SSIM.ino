@@ -9,7 +9,9 @@ master sender: https://github.com/esp8266/Arduino/blob/master/libraries/Wire/exa
 plot://https://learn.adafruit.com/experimenters-guide-for-metro/circ08-using%20the%20arduino%20serial%20plotter
 */
 #include <Wire.h>         // I2C interface library
+#include <MsTimer2.h>     // Ms2 Timer Library
 #include <stdint.h>
+
 
 const float FREQ = 6.0; //frequency in khz
 const float BW = 10; //3db beamwidth in degrees
