@@ -4,7 +4,7 @@
  * Description: Initialize flash memory file with TCU system constants
  */
 
-#include <Timer.h>
+#include <timer.h>
 #include <SPI.h>
 #include <Adafruit_SPIFlash.h>
 #include <Adafruit_SPIFlash_FatFs.h>
