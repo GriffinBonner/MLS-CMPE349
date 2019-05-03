@@ -110,12 +110,12 @@ void fatfs_init(){
 
     for(int i = 0; i < 8; i++){
       String line = readFile.readStringUntil('\n');
-      Serial.println(line);
+      Serial.println(line, HEX);
     }
 
-    Serial.print("Total size of test.txt (bytes): "); Serial.println(readFile.size(), DEC);
-    Serial.print("Current position in test.txt: "); Serial.println(readFile.position(), DEC);
-    Serial.print("Available data to read in test.txt: "); Serial.println(readFile.available(), DEC);
+    Serial.print("Total size of tcu_constants.txt (bytes): "); Serial.println(readFile.size(), DEC);
+    Serial.print("Current position in tcu_constants.txt: "); Serial.println(readFile.position(), DEC);
+    Serial.print("Available data to read in tcu_constants.txt: "); Serial.println(readFile.available(), DEC);
   }
 }
 
