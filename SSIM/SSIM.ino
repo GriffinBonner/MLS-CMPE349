@@ -28,11 +28,6 @@ int timedelay;
 uint8_t bytes[3];
 uint8_t function;
 
-const int16_t I2C_MASTER = 0x42;
-const int16_t I2C_SLAVE = 0x08;
-#define SDA_PIN 4
-#define SCL_PIN 5  
-
 float Tzero[3] = {6800, 4800, 33500};
 
 void setup() {
