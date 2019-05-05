@@ -1,6 +1,6 @@
 /*
 SSIM code for transmitting signnal 
-I2c protocal utilizes with wire library
+I2c protocal utility with wire library
 Authors: Zak Kempler, Jd Bryon, Taylor Bear, Cole Schmidt
 Reference code ----------
 master sender / slave receiver: https://www.arduino.cc/en/Tutorial/MasterWriter
