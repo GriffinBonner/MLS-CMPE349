@@ -12,22 +12,21 @@ plot://https://learn.adafruit.com/experimenters-guide-for-metro/circ08-using%20t
 #include <timer.h>        // timer library
 //#include <stdint.h>
 
-auto timer = timer_create_default(); 
-int time = 0;
-
 const float FREQ = 6.0; //frequency in khz
 const float BW = 10; //3db beamwidth in degrees
 const float SCANVEL = 2.0; //degree per microsecond
 float TR = 10; //angle of plane's receiver in the coverage volume 
-float TS; //scanning beam angle (should be function of time)
-double volt; //output voltage
-bool antennas[3]; //0:AZ 1:BAZ 2:E
-int phase; //1 or -1
-float t; //counter for time?
-int timedelay;
+float TS = 0; //scanning beam angle (should be function of time)
+double volt = 0; //output voltage
+bool antennas[3] = {0,0,0}; //0:AZ 1:BAZ 2:E
+int phase = 1; //1 or -1
+int timedelay = 0; 
+int time = 0;
+
+auto timer = timer_create_default();
 
 uint8_t bytes[3];
-uint8_t function;
+uint8_t function = 0;
 
 float Tzero[3] = {6800, 4800, 33500};
 
