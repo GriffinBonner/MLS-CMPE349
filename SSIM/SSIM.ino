@@ -33,12 +33,12 @@ float Tzero[3] = {6800, 4800, 33500};
 
 void setup() {
   Wire.begin(8);                // join i2c bus with address #8
-  Wire.onReceive(receiveEvent); // register event
+  Wire.onReceive(getBytes); // register event
   Serial.begin(9600);           // start serial for output
   timer.every(1/FREQ, increment_time);
 }
 
-void receiveEvent(int howMany) {
+void getBytes(int howMany) {
   int i = 0; 
   while (1 < Wire.available()) { // loop through all but the last
     bytes[i]  = Wire.read(); // receive byte as a character
