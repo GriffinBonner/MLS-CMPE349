@@ -4,6 +4,7 @@ I2c protocal utilizes with wire library
 Authors: Zak Kempler, Jd Bryon, Taylor Bear, Cole Schmidt
 Reference code ----------
 master sender / slave receiver: https://www.arduino.cc/en/Tutorial/MasterWriter
+timer: https://github.com/contrem/arduino-timer
 plot://https://learn.adafruit.com/experimenters-guide-for-metro/circ08-using%20the%20arduino%20serial%20plotter
 */
 
