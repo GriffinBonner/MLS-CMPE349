@@ -10,7 +10,7 @@ plot://https://learn.adafruit.com/experimenters-guide-for-metro/circ08-using%20t
 
 #include <Wire.h>         // I2C interface library
 #include <timer.h>        // timer library
-#include <stdint.h>
+//#include <stdint.h>
 
 auto timer = timer_create_default(); 
 int time = 0;
@@ -53,7 +53,6 @@ bool increment_time(void *){
 }
   
 void loop() {
-  
   timer.tick();
     
   //reset antennas
@@ -72,8 +71,7 @@ void loop() {
     
   }
   else if(function == 0x92) //BAZ
-  {
-    
+  { 
     antennas[0] == 0;
     antennas[1] == 1;
     antennas[2] == 0;
@@ -87,7 +85,7 @@ void loop() {
   }  
   
   //Determine timing t (in microseconds)
-  timedelay = bytes[1]*256 + bytes[2]&0b11111100; //assuming byte3 has msb starting at bit 8 (note 22 bits used out of 3 bytes
+  timedelay = bytes[1]*256 + bytes[2]&0b11111100; //assuming byte3 has msb starting at bit 8 (note 22 bits used out of 3 bytes)
     
   //Set Scanning Beam Angle  
   if(antennas[0] == 1)
@@ -105,17 +103,17 @@ void loop() {
   }
     
   //determine phase shift
-  if(bytes[0] & 0b00000001 == 1)
-  {
-    phase = 1;
-  }
-  else 
+  if((bytes[0] & 0b00000001) == 1)
   {
     phase = -1;
   }
+  else 
+  {
+    phase = 1;
+  }
       
   //Simulate signal
-  if(antennas[0] == 1 || antennas[2] == 1 || antennas[2] == 1 )
+  if(antennas[0] == 1 || antennas[1] == 1 || antennas[2] == 1 )
   {
     volt = phase*sin(time)*sin((TR-TS)/(1.12*BW))/((TR-TS)/(1.12*BW));
   }
