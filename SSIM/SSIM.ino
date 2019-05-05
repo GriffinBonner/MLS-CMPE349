@@ -34,7 +34,7 @@ void setup() {
   Wire.begin(8);                // join i2c bus with address #8
   Wire.onReceive(getBytes); // register event
   Serial.begin(9600);           // start serial for output
-  timer.every(1/FREQ, increment_time);
+  timer.every(1/FREQ, incrementTime);
 }
 
 void getBytes(int howMany) {
@@ -46,7 +46,7 @@ void getBytes(int howMany) {
   }
 }
 
-bool increment_time(void *){
+bool incrementTime(void *){
   time++;
   return true;
 }
