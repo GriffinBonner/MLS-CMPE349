@@ -55,11 +55,12 @@ bool increment_time(void *){
 void loop() {
   timer.tick();
     
-  //reset antennas
+  /*reset antennas
   antennas[0] == 0;
   antennas[1] == 0;
   antennas[2] == 0;
-    
+  */ 
+  
   //determine function type, then set antenna array
   function = bytes[0]&0b11111110;
     
