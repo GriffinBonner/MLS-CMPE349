@@ -48,6 +48,8 @@ void getBytes(int howMany) {
 
 bool incrementTime(void *){
   time++;
+  Serial.println(volt); //plot signal
+  Serial.print(" "); 
   return true;
 }
   
@@ -121,7 +123,4 @@ void loop() {
   {
     volt = 0;
   }
-    
-  Serial.println(volt); //plot signal
-  Serial.print(" "); 
 }
