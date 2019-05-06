@@ -48,8 +48,17 @@ void getBytes(int howMany) {
 
 bool display(void *){
   time++;
-  Serial.println(volt); //plot signal
-  Serial.print(" "); 
+  if(phase == -1)
+  {
+    Serial.println(-1*volt);
+    Serial.print(" "); 
+    phase = 1;
+  }
+  else
+  {
+    Serial.println(volt);
+    Serial.print(" "); 
+  }
   return true;
 }
   
@@ -117,7 +126,7 @@ void loop() {
   //Simulate signal
   if(antennas[0] == 1 || antennas[1] == 1 || antennas[2] == 1 )
   {
-    volt = phase*sin(time)*sin((TR-TS)/(1.12*BW))/((TR-TS)/(1.12*BW));
+    volt = 10*sin(time)*sin((TR-TS)/(1.12*BW))/((TR-TS)/(1.12*BW));
   }
   else 
   {
