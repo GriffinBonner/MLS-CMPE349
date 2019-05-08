@@ -84,6 +84,20 @@ void fatfs_init(){
       writeFile.print(0xAE, HEX);    // Auxiliary Data Word B (ADWB) function ID
       writeFile.print(0xF1, HEX);    // Auxiliary Data Word C (ADWC) function ID
     }
+
+    /* ---------------- SCAN LIMITS -------------------------------------------*/
+    writeFile.print(0x3E, HEX);      // AZ_SCAN_LIM   (Negative) (-62 Degrees)
+    writeFile.print(0x3E, HEX);      // AZ_SCAN_LIM   (Positive) (+62 Degrees)
+    writeFile.print(0x2A, HEX);      // BAZ_SCAN_LIM  (Negative) (-42 Degrees)
+    writeFile.print(0x2A, HEX);      // BAZ_SCAN_LIM  (Positive) (+42 Degrees)
+    writeFile.print(0x02, HEX);      // EL_SCAN_LIM   (Negative) (-2 Degrees)
+    writeFile.print(0x1E, HEX);      // EL_SCAN_LIM   (Positive) (+30 Degrees)
+
+    /* ---------------- IDENTIFICATION ----------------------------------------*/
+    writeFile.print("MMLS");         // STATION_ID    (MMLS)
+    writeFile.print("AZ, BAZ, EL")   // STATION_TYPE  (AZ, BAZ, EL)
+
+
     writeFile.close();
   }
 
