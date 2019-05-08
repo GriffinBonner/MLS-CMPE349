@@ -90,9 +90,7 @@ void fatfs_read(){
 }
 
 bool TX_SEQUENCE(void *){
-
-  //Serial.println("Full Transmission Sequence Started");
-
+  Serial.println("Full Transmission Sequence Started");
   return true;
 }
 
@@ -131,19 +129,15 @@ void setup() {
 
   serial_init();                                                          // Initialize serial connection             
   fatfs_read();                                                           // Read data from tcu_constants.txt to local SRAM
-
+  Wire.begin();                                                           // Join I2C Bus
+  pinMode(TIME_SYNC_OUT, OUTPUT);                                         // Configure time sync pin 3 as output 
   TX_SEQ_TIMER.every(615000, TX_SEQUENCE);                                // Restart full transmission sequence every 615 ms
-
-  //pinMode(SLAVE_SELECT, OUTPUT);                                          // Configure SlaveSelect pin: 10 as output
-  //pinMode(TIME_SYNC_OUT, OUTPUT);                                         // Configure TIME_SYNC_OUT pin: 3 as output
-  //SPI.beginTransaction(SPISettings(48000000, MSBFIRST, SPI_MODE0));       // CPOL: 0, CPHA: 0, Output Edge: Falling, Data Capture: Rising
 
 }
 
 void loop(){
 
   TX_SEQ_TIMER.tick();                                                      // Full transmission sequence timer (615 ms period)
-
   //digitalWrite(TIME_SYNC_OUT, HIGH);                                      // 1ms positive pulse
 
 }
