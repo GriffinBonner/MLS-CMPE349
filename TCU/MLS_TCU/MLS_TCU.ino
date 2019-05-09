@@ -34,11 +34,22 @@ enum function{AZ, BAZ, EL, BDWD1, BDWD2, BDWD3, BDWD4, BDWD6, ADWDA, ADWDB, ADWD
 byte function_id[11];
 
 /* ----------------- Signal Definitions -------------- */
-const int SLAVE_SELECT = 10;                                               // Active low slave select control signal
-const int TIME_SYNC_OUT = 3;                                               // Time synchronization output (1ms positive pulse corresponding to time-zero of transmission cycle)
+const int TIME_SYNC_OUT = 1;                                               // Time synchronization output (1ms positive pulse corresponding to time-zero of transmission cycle)
+const int SCAN = 7;                                                        // Scan TO - FRO 
+const int PHASE = 9;                                                       // Phase Select (DPSK)
+const int ANT0 = 10;                                                       // Antenna Select bit-0
+const int ANT1 = 11;                                                       // Antenna Select bit-1
+const int ANT2 = 12;                                                       // Antenna Select bit-2
+const int TX_EN = 13;                                                      // Transmit Enable 
+
 
 /* ----------------- System Timer -------------------- */
 Timer<1, micros> TX_SEQ_TIMER;                                             // Full transmission sequence timer (615 ms period)
+Timer<2, micros> PULSE_TIMER;
+Timer<8, micros> AZ_TIMER;
+Timer<4, micros> BAZ_TIMER;
+Timer<24, micros> EL_TIMER;
+
 
 
 /* ----------------- TCU Functions ------------------- */
@@ -89,6 +100,8 @@ void fatfs_read(){
 
 bool TX_SEQUENCE(void *){
   Serial.println("Full Transmission Sequence Started");
+  PULSE_TIMER.in(0, TOGGLE_PULSE);
+  PULSE_TIMER.in(1000, TOGGLE_PULSE);
   return true;
 }
 
@@ -122,21 +135,111 @@ bool ADWD_FNC(void *){
   return true;
 }
 
+bool SEQ1_FNC(void *){
+  Serial.println("Sequence 1 Function Started");
+  return true;
+}
+
+bool SEQ2_FNC(void *){
+  Serial.println("Sequence 2 Function Started");
+  return true;
+}
+
+// Toggle 1 ms positive pulse
+bool TOGGLE_PULSE(void *){
+  digitalWrite(TIME_SYNC_OUT, !digitalRead(TIME_SYNC_OUT));
+  return true;
+}
+
+// IDENT/DATA (ALL)
+bool ANT_DATA(){
+  digitalWrite(ANT0, LOW);
+  digitalWrite(ANT1, LOW);
+  digitalWrite(ANT2, LOW);
+  return true;
+}
+
+// L-OCI (AZ, BAZ)
+bool ANT_LOCI(){
+  digitalWrite(ANT0, HIGH);
+  digitalWrite(ANT1, LOW);
+  digitalWrite(ANT2, LOW);
+  return true;
+}
+
+// R/U-OCI (AZ, BAZ, EL)
+bool ANT_RUOCI(){
+  digitalWrite(ANT0, LOW);
+  digitalWrite(ANT1, HIGH);
+  digitalWrite(ANT2, LOW);
+  return true;
+}
+
+// L CLR (AZ, BAZ)
+bool ANT_LCLR(){
+  digitalWrite(ANT0, HIGH);
+  digitalWrite(ANT1, HIGH);
+  digitalWrite(ANT2, LOW);
+  return true;
+}
+
+// R CLR (AZ, BAZ)
+bool ANT_RCLR(){
+  digitalWrite(ANT0, LOW);
+  digitalWrite(ANT1, LOW);
+  digitalWrite(ANT2, HIGH);
+  return true;
+}
+
+// SCANNING (AZ, BAZ, EL)
+bool ANT_SCANNING(){
+  digitalWrite(ANT0, HIGH);
+  digitalWrite(ANT1, LOW);
+  digitalWrite(ANT2, HIGH);
+  return true;
+}
+
+// OFF (Default Position)
+bool ANT_OFF(){
+  digitalWrite(ANT0, LOW);
+  digitalWrite(ANT1, HIGH);
+  digitalWrite(ANT2, HIGH);
+  return true;
+}
+
+// TEST (Not used)
+bool ANT_TEST(){
+  digitalWrite(ANT0, HIGH);
+  digitalWrite(ANT1, HIGH);
+  digitalWrite(ANT2, HIGH);
+}
+
 /* ----------------- TCU Setup -------------------- */
 void setup() {
 
   serial_init();                                                          // Initialize serial connection             
   fatfs_read();                                                           // Read data from tcu_constants.txt to local SRAM
   Wire.begin();                                                           // Join I2C Bus
-  pinMode(TIME_SYNC_OUT, OUTPUT);                                         // Configure time sync pin 3 as output 
-  TX_SEQ_TIMER.every(615000, TX_SEQUENCE);                                // Restart full transmission sequence every 615 ms
 
+  pinMode(TIME_SYNC_OUT, OUTPUT);                                         // Configure time sync pin 3 as output 
+  pinMode(SCAN, OUTPUT);                                                  // Set SCAN pin as output
+  pinMode(PHASE, OUTPUT);                                                 // Set PHASE pin as output
+  pinMode(ANT0, OUTPUT);                                                  // Set ANT0 pin as output
+  pinMode(ANT1, OUTPUT);                                                  // Set ANT1 pin as output
+  pinMode(ANT2, OUTPUT);                                                  // Set ANT2 pin as output
+
+  TX_SEQ_TIMER.every(615000, TX_SEQUENCE);                                // Restart full transmission sequence every 615 ms
+  AZ_TIMER.every(76875, AZ_FNC);
+  BAZ_TIMER.every(153750, BAZ_FNC);
+  EL_TIMER.every(25625, EL_FNC);
 }
 
 void loop(){
-
-  TX_SEQ_TIMER.tick();                                                      // Full transmission sequence timer (615 ms period)
-
+  TX_SEQ_TIMER.tick();                                                     // Full transmission sequence timer (615 ms period)
+  PULSE_TIMER.tick();                                                      // Full transmission sequence timer positive pulse (1 ms period)
+  AZ_TIMER.tick();                                                         // Approach Azimuth Function (Freq: 13 Hz)
+  BAZ_TIMER.tick();                                                        // Back Azimuth Function (Freq: 6.5 Hz)
+  EL_TIMER.tick();                                                         // Approach Elevation Function (Freq: 39 Hz)
 }
 
 

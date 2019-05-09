@@ -95,7 +95,7 @@ void fatfs_init(){
 
     /* ---------------- IDENTIFICATION ----------------------------------------*/
     writeFile.print("MMLS");         // STATION_ID    (MMLS)
-    writeFile.print("AZ, BAZ, EL")   // STATION_TYPE  (AZ, BAZ, EL)
+    writeFile.print("AZ, BAZ, EL");   // STATION_TYPE  (AZ, BAZ, EL)
 
 
     writeFile.close();
