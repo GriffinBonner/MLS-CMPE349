@@ -42,8 +42,6 @@ Timer<1, micros> TX_SEQ_TIMER;                                             // Fu
 
 
 /* ----------------- TCU Functions ------------------- */
-
-
 // Initialize Serial Communication 
 void serial_init(){
   Serial.begin(115200);
@@ -138,7 +136,6 @@ void setup() {
 void loop(){
 
   TX_SEQ_TIMER.tick();                                                      // Full transmission sequence timer (615 ms period)
-  //digitalWrite(TIME_SYNC_OUT, HIGH);                                      // 1ms positive pulse
 
 }
 
