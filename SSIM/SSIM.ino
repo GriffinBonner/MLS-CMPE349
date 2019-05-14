@@ -1,135 +1,122 @@
 /*
-SSIM code for transmitting signnal 
-I2c protocal utility with wire library
-Authors: Zak Kempler, Jd Bryon, Taylor Bear, Cole Schmidt
-Reference code ----------
-master sender / slave receiver: https://www.arduino.cc/en/Tutorial/MasterWriter
-timer: https://github.com/contrem/arduino-timer
-plot://https://learn.adafruit.com/experimenters-guide-for-metro/circ08-using%20the%20arduino%20serial%20plotter
+  SSIM code for transmitting signnal
+  I2c protocal utility with wire library
+  Authors: Zak Kempler, Jd Bryon, Taylor Bear, Cole Schmidt
+  Reference code ----------
+  master sender / slave receiver: https://www.arduino.cc/en/Tutorial/MasterWriter
+  timer: https://github.com/contrem/arduino-timer
+  plot://https://learn.adafruit.com/experimenters-guide-for-metro/circ08-using%20the%20arduino%20serial%20plotter
 */
-
-#include <Wire.h>         // I2C interface library
 #include <timer.h>        // timer library
 //#include <stdint.h>
 
-const float FREQ = 6.0; //frequency in khz
-const float BW = 10; //3db beamwidth in degrees
-const float SCANVEL = 2.0; //degree per microsecond
-float TR = 10; //angle of plane's receiver in the coverage volume 
-float TS = 0; //scanning beam angle (should be function of time)
+const float FREQ = 150; //frequency in khz
+const float BW = 1; //3db beamwidth in degrees
+float TR = 10; //angle of plane's receiver in the coverage volume
+float TS = -62; //scanning beam angle (should be function of time)
 double volt = 0; //output voltage
-bool antennas[3] = {0,0,0}; //0:AZ 1:BAZ 2:E
 int phase = 1; //1 or -1
-int timedelay = 0; 
-int time = 0;
+double time = 0;
+double freqtime = 0;
+double amplitude;
 
-auto timer = timer_create_default();
+const int SB_TO_FRO = 7;                                                   // Scan TO - FRO 
+const int SB_START = 2;                                                    // Pulse on start of scanning beam
+const int PHASE = 9;                                                       // Phase Select (DPSK)
+const int ANT0 = 10;                                                       // Antenna Select bit-0
+const int ANT1 = 11;                                                       // Antenna Select bit-1
+const int ANT2 = 12;                                                       // Antenna Select bit-2
+const int TX_EN = 13;                                                      // Transmit Enable
 
-uint8_t bytes[3];
+Timer<2, micros> timer;
+
+uint8_t bytes;
 uint8_t function = 0;
-
-float Tzero[3] = {6800, 4800, 33500};
+int reset = 0;
+int i = 0;
 
 void setup() {
-  Wire.begin(8);                // join i2c bus with address #8
-  Wire.onReceive(getBytes); // register event
+  pinMode(SB_TO_FRO, INPUT);                                             // Set SB_TO_FRO pin as input (scanning beam to/fro)
+  pinMode(SB_START, INPUT);                                              // Set SB_START pin as input (scanning bream start)
+  pinMode(PHASE, INPUT);                                                 // Set PHASE pin as input
+  pinMode(ANT0, INPUT);                                                  // Set ANT0 pin as input
+  pinMode(ANT1, INPUT);                                                  // Set ANT1 pin as input
+  pinMode(ANT2, INPUT);                                                  // Set ANT2 pin as input
+  pinMode(TX_EN, INPUT);
+  
   Serial.begin(9600);           // start serial for output
-  timer.every(1/FREQ, display);
+  timer.every(50, TS_Inc);
+  timer.every(7, freq_Inc);
 }
 
-void getBytes(int howMany) {
-  int i = 0; 
-  while (1 < Wire.available()) { // loop through all but the last
-    bytes[i]  = Wire.read(); // receive byte as a character
-    //Serial.print(bytes[i]);         // print the character
-    ++i;
+bool freq_Inc(void *)
+{
+  freqtime++;
+  return true;
   }
-}
 
-bool display(void *){
-  time++;
-  if(phase == -1)
+bool TS_Inc(void *) { 
+  if(reset == 0 && digitalRead(SB_START))
   {
-    Serial.println(-1*volt);
-    Serial.print(" "); 
-    phase = 1;
+    time = 0;
   }
-  else
+  if(digitalRead(TX_EN))
   {
-    Serial.println(volt);
-    Serial.print(" "); 
+  time = time + 67; //94
+  if(digitalRead(SB_TO_FRO) ) {
+  TS  = -62+.02*time; }
+  else{
+  TS = 62 - .02*time;  
+  }      
+  if(digitalRead(SB_START))
+  {
+  reset = 1;  
+    }
+   else
+   {
+    reset = 0;
+    }
   }
+  
+  if(digitalRead(ANT2) && digitalRead(ANT1) && digitalRead(ANT0)) 
+  {
+    amplitude = .1; // test
+  }
+  else if(digitalRead(ANT2) && digitalRead(ANT1) && !digitalRead(ANT0))
+  {
+    amplitude = 0; // off
+  }
+  else if(digitalRead(ANT2) && !digitalRead(ANT1) && digitalRead(ANT0))
+  {
+    amplitude = 10; // scanning
+  }
+  else if(digitalRead(ANT2) && !digitalRead(ANT1) && !digitalRead(ANT0))
+  {
+    amplitude = .2; // R CLR
+  }
+  else if(!digitalRead(ANT2) && digitalRead(ANT1) && digitalRead(ANT0))
+  {
+    amplitude = .3; // L CLR
+  }
+  else if(!digitalRead(ANT2) && digitalRead(ANT1) && !digitalRead(ANT0))
+  {
+    amplitude = .6; // R/U-OCI
+  }
+  else if(!digitalRead(ANT2) && !digitalRead(ANT1) && digitalRead(ANT0))
+  {
+    amplitude = .7; // L-OCI
+  }
+  else if(!digitalRead(ANT2) && !digitalRead(ANT1) && !digitalRead(ANT0))
+  {
+    amplitude = 1; //IDENT/DATA
+  }
+  volt = sin((TR - TS) / (1.12 * BW)) / ((TR - TS) / (1.12 * BW));
+  Serial.println(10*volt);
+  Serial.print(" ");
   return true;
 }
-  
+
 void loop() {
   timer.tick();
-    
-  /*reset antennas
-  antennas[0] == 0;
-  antennas[1] == 0;
-  antennas[2] == 0;
-  */ 
-  
-  //determine function type, then set antenna array
-  function = bytes[0]&0b11111110;
-    
-  if(function == 0x32) //AZ function
-  {
-    antennas[0] == 1;
-    antennas[1] == 0;
-    antennas[2] == 0;
-    
-  }
-  else if(function == 0x92) //BAZ
-  { 
-    antennas[0] == 0;
-    antennas[1] == 1;
-    antennas[2] == 0;
-  }
-  else if (function == 0xC2) //EL
-  {
-    
-    antennas[0] == 0;
-    antennas[1] == 0;
-    antennas[2] == 1;
-  }  
-  
-  //Determine timing t (in microseconds)
-  timedelay = bytes[1]*256 + bytes[2]&0b11111100; //assuming byte3 has msb starting at bit 8 (note 22 bits used out of 3 bytes)
-    
-  //Set Scanning Beam Angle  
-  if(antennas[0] == 1)
-  {
-    TS = (Tzero[0] - timedelay)*SCANVEL/2;
-  }
-  else if(antennas[1] == 1)
-  {
-    TS = (Tzero[1] - timedelay)*SCANVEL/2;
-  }
-  
-  else if(antennas[2] == 1)
-  {
-    TS = (Tzero[2] - timedelay)*SCANVEL/2;
-  }
-    
-  //determine phase shift
-  if((bytes[0] & 0b00000001) == 1)
-  {
-    phase = -1;
-  }
-  else 
-  {
-    phase = 1;
-  }
-      
-  //Simulate signal
-  if(antennas[0] == 1 || antennas[1] == 1 || antennas[2] == 1 )
-  {
-    volt = 10*sin(time)*sin((TR-TS)/(1.12*BW))/((TR-TS)/(1.12*BW));
-  }
-  else 
-  {
-    volt = 0;
-  }
+ 
 }
