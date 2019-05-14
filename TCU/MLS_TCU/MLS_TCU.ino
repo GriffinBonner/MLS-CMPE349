@@ -30,12 +30,18 @@ Adafruit_SPIFlash flash(FLASH_SS, &FLASH_SPI_PORT);
 Adafruit_W25Q16BV_FatFs fatfs(flash);
 
 /* ----------------- Global Variables ---------------- */
-enum function{AZ, BAZ, EL, BDWD1, BDWD2, BDWD3, BDWD4, BDWD6, ADWDA, ADWDB, ADWDC};
-byte function_id[11];
+enum FUNCTION{AZ, BAZ, EL, BDWD1, BDWD2, BDWD3, BDWD4, BDWD5, BDWD6, ADWDA, ADWDB, ADWDC};
+byte FUNCTION_ID[12] = {0x32, 0x92, 0xC2, 0x50, 0x78, 0xA0, 0x88, 0xD8, 0x1A, 0xE4, 0xAE, 0xF0};
+
+// TODO: Potentially create artificial timing data bytes)
+
+/* ----------------- Test Bytes ---------------------- */
+
 
 /* ----------------- Signal Definitions -------------- */
 const int TIME_SYNC_OUT = 1;                                               // Time synchronization output (1ms positive pulse corresponding to time-zero of transmission cycle)
-const int SCAN = 7;                                                        // Scan TO - FRO 
+const int SB_TO_FRO = 7;                                                   // Scan TO - FRO 
+const int SB_START = 2;                                                    // Pulse on start of scanning beam
 const int PHASE = 9;                                                       // Phase Select (DPSK)
 const int ANT0 = 10;                                                       // Antenna Select bit-0
 const int ANT1 = 11;                                                       // Antenna Select bit-1
@@ -45,10 +51,11 @@ const int TX_EN = 13;                                                      // Tr
 
 /* ----------------- System Timer -------------------- */
 Timer<1, micros> TX_SEQ_TIMER;                                             // Full transmission sequence timer (615 ms period)
-Timer<2, micros> PULSE_TIMER;
-Timer<8, micros> AZ_TIMER;
-Timer<4, micros> BAZ_TIMER;
-Timer<24, micros> EL_TIMER;
+Timer<2, micros> PULSE_TIMER;                                              // Positive Pulse timer (1 ms period)
+Timer<8, micros> AZ_TIMER;                                                 // Azimuth Function Timer (76875 usec period)
+Timer<10, micros> GEN_TIMER;                                                // General Timer
+//Timer<4, micros> BAZ_TIMER;
+//Timer<24, micros> EL_TIMER;
 
 
 
@@ -90,17 +97,22 @@ void fatfs_read(){
     Serial.print("Available data to read in tcu_constants.txt: "); Serial.println(readFile.available(), DEC);
 
     // Read function ID's into SRAM array
+    /*
     for(int i = 0; i < 11; i++){
       String line = readFile.readStringUntil('\n');
       function_id[i] = line[0];
       Serial.println(function_id[i]);
     }
+    */
   }
 }
 
+// Full transmission sequence function (615 ms period)
 bool TX_SEQUENCE(void *){
   Serial.println("Full Transmission Sequence Started");
-  PULSE_TIMER.in(0, TOGGLE_PULSE);
+
+  // 1 ms positive pulse 
+  PULSE_TIMER.in(0, TOGGLE_PULSE);                        
   PULSE_TIMER.in(1000, TOGGLE_PULSE);
   return true;
 }
@@ -108,6 +120,28 @@ bool TX_SEQUENCE(void *){
 // Approach Azimuth Function
 bool AZ_FNC(void *){
   Serial.println("Approach Azimuth Function Started");
+
+  // Transmit Approach Azimuth function ID to slave SSIM
+  Wire.beginTransmission(8);
+  Wire.write(FUNCTION_ID[AZ]);
+
+  
+  
+  // Handle timing for TX_EN signal
+  GEN_TIMER.in(2560, TOGGLE_TX_EN);
+  GEN_TIMER.in(8760, TOGGLE_TX_EN);
+  GEN_TIMER.in(9360, TOGGLE_TX_EN);
+  GEN_TIMER.in(15560, TOGGLE_TX_EN);
+
+  // Handle timing for SB_START signal
+  GEN_TIMER.in(2560, TOGGLE_SB_START);
+  GEN_TIMER.in(3560, TOGGLE_SB_START);
+  GEN_TIMER.in(9360, TOGGLE_SB_START);
+  GEN_TIMER.in(10360, TOGGLE_SB_START);
+
+  // Handle timing for SB_TO_FRO signal
+  GEN_TIMER.in(2560, TOGGLE_SB_TF);
+  GEN_TIMER.in(8760, TOGGLE_SB_TF);
   return true;
 }
 
@@ -151,8 +185,33 @@ bool TOGGLE_PULSE(void *){
   return true;
 }
 
+// Toggle SB_TO_FRO (scanning beam to/fro) output
+bool TOGGLE_SB_TF(void *){
+  digitalWrite(SB_TO_FRO, !digitalRead(SB_TO_FRO));
+  return true;
+}
+
+// Toggle SB_START (scanning beam start)
+bool TOGGLE_SB_START(void *){
+  digitalWrite(SB_START, !digitalRead(SB_START));
+  return true;
+}
+
+// Toggle PHASE (differential phase shift keying) output
+bool TOGGLE_PHASE(void *){
+  digitalWrite(PHASE, !digitalRead(PHASE));
+  return true;
+}
+
+
+// Toggle TX_EN (transmit enable) output
+bool TOGGLE_TX_EN(void *){
+  digitalWrite(TX_EN, !digitalRead(TX_EN));
+  return true;
+}
+
 // IDENT/DATA (ALL)
-bool ANT_DATA(){
+bool ANT_DATA(void *){
   digitalWrite(ANT0, LOW);
   digitalWrite(ANT1, LOW);
   digitalWrite(ANT2, LOW);
@@ -160,7 +219,7 @@ bool ANT_DATA(){
 }
 
 // L-OCI (AZ, BAZ)
-bool ANT_LOCI(){
+bool ANT_LOCI(void *){
   digitalWrite(ANT0, HIGH);
   digitalWrite(ANT1, LOW);
   digitalWrite(ANT2, LOW);
@@ -168,7 +227,7 @@ bool ANT_LOCI(){
 }
 
 // R/U-OCI (AZ, BAZ, EL)
-bool ANT_RUOCI(){
+bool ANT_RUOCI(void *){
   digitalWrite(ANT0, LOW);
   digitalWrite(ANT1, HIGH);
   digitalWrite(ANT2, LOW);
@@ -176,7 +235,7 @@ bool ANT_RUOCI(){
 }
 
 // L CLR (AZ, BAZ)
-bool ANT_LCLR(){
+bool ANT_LCLR(void *){
   digitalWrite(ANT0, HIGH);
   digitalWrite(ANT1, HIGH);
   digitalWrite(ANT2, LOW);
@@ -184,7 +243,7 @@ bool ANT_LCLR(){
 }
 
 // R CLR (AZ, BAZ)
-bool ANT_RCLR(){
+bool ANT_RCLR(void *){
   digitalWrite(ANT0, LOW);
   digitalWrite(ANT1, LOW);
   digitalWrite(ANT2, HIGH);
@@ -192,7 +251,7 @@ bool ANT_RCLR(){
 }
 
 // SCANNING (AZ, BAZ, EL)
-bool ANT_SCANNING(){
+bool ANT_SCANNING(void *){
   digitalWrite(ANT0, HIGH);
   digitalWrite(ANT1, LOW);
   digitalWrite(ANT2, HIGH);
@@ -200,7 +259,7 @@ bool ANT_SCANNING(){
 }
 
 // OFF (Default Position)
-bool ANT_OFF(){
+bool ANT_OFF(void *){
   digitalWrite(ANT0, LOW);
   digitalWrite(ANT1, HIGH);
   digitalWrite(ANT2, HIGH);
@@ -208,7 +267,7 @@ bool ANT_OFF(){
 }
 
 // TEST (Not used)
-bool ANT_TEST(){
+bool ANT_TEST(void *){
   digitalWrite(ANT0, HIGH);
   digitalWrite(ANT1, HIGH);
   digitalWrite(ANT2, HIGH);
@@ -221,25 +280,30 @@ void setup() {
   fatfs_read();                                                           // Read data from tcu_constants.txt to local SRAM
   Wire.begin();                                                           // Join I2C Bus
 
+  // Set pins as outputs
   pinMode(TIME_SYNC_OUT, OUTPUT);                                         // Configure time sync pin 3 as output 
-  pinMode(SCAN, OUTPUT);                                                  // Set SCAN pin as output
+  pinMode(SB_TO_FRO, OUTPUT);                                             // Set SB_TO_FRO pin as output (scanning beam to/fro)
+  pinMode(SB_START, OUTPUT);                                              // Set SB_START pin as output (scanning bream start)
   pinMode(PHASE, OUTPUT);                                                 // Set PHASE pin as output
   pinMode(ANT0, OUTPUT);                                                  // Set ANT0 pin as output
   pinMode(ANT1, OUTPUT);                                                  // Set ANT1 pin as output
   pinMode(ANT2, OUTPUT);                                                  // Set ANT2 pin as output
 
+  // Initialize periodic timers
   TX_SEQ_TIMER.every(615000, TX_SEQUENCE);                                // Restart full transmission sequence every 615 ms
   AZ_TIMER.every(76875, AZ_FNC);
-  BAZ_TIMER.every(153750, BAZ_FNC);
-  EL_TIMER.every(25625, EL_FNC);
+  //BAZ_TIMER.every(153750, BAZ_FNC);
+  //EL_TIMER.every(25625, EL_FNC);
 }
 
+// Tick system timers
 void loop(){
   TX_SEQ_TIMER.tick();                                                     // Full transmission sequence timer (615 ms period)
   PULSE_TIMER.tick();                                                      // Full transmission sequence timer positive pulse (1 ms period)
   AZ_TIMER.tick();                                                         // Approach Azimuth Function (Freq: 13 Hz)
-  BAZ_TIMER.tick();                                                        // Back Azimuth Function (Freq: 6.5 Hz)
-  EL_TIMER.tick();                                                         // Approach Elevation Function (Freq: 39 Hz)
+  GEN_TIMER.tick();
+  //BAZ_TIMER.tick();                                                      // Back Azimuth Function (Freq: 6.5 Hz)
+  //EL_TIMER.tick();                                                       // Approach Elevation Function (Freq: 39 Hz)
 }
 
 
