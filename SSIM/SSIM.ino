@@ -46,7 +46,7 @@ void setup() {
   
   Serial.begin(9600);           // start serial for output
   timer.every(50, TS_Inc);
-  timer.every(7, freq_Inc);
+  timer.every(25, freq_Inc);
 }
 
 bool freq_Inc(void *)
@@ -110,7 +110,7 @@ bool TS_Inc(void *) {
   {
     amplitude = 1; //IDENT/DATA
   }
-  volt = sin((TR - TS) / (1.12 * BW)) / ((TR - TS) / (1.12 * BW));
+  volt = cos(FREQ*2*3.14159*.025*freqtime)*sin((TR - TS) / (1.12 * BW)) / ((TR - TS) / (1.12 * BW));
   Serial.println(10*volt);
   Serial.print(" ");
   return true;
@@ -118,5 +118,4 @@ bool TS_Inc(void *) {
 
 void loop() {
   timer.tick();
- 
 }
